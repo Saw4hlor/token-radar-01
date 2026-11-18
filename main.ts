@@ -1,11 +1,13 @@
-// Launch Radar: a token-radar-01 entry (Node 22, standard library only).
+// Launch Radar v2: a token-radar-01 entry (Node 22, standard library only).
 //
-// The program reads the sealed snapshot from /input/snapshot.json (or --input <file|dir>), scores every
-// genuine pre-token protocol with the comps-anchored model in lib/model.ts, writes the ranked board to
-// /output/board.json and the dashboard's data to /output/data.js, copies this repository's dashboard/
-// and screenshots/ into /output, and writes /output/dossier.json with the vendored make.fun library,
-// byte for byte the scorer's own copy. Before anything is written the board is checked against the
-// gate's shape (coverage, ranks, order, farm steps); a board the gate would refuse stops the run.
+// The program reads the sealed snapshot from /input/snapshot.json (or --input <file|dir>),
+// fits the value model in lib/model.ts on the snapshot's own traded protocols — choosing
+// among candidate models by leave-one-out cross-validation, in the open — writes the
+// ranked board to /output/board.json and the dashboard's data to /output/data.js, copies
+// this repository's dashboard/ and screenshots/ into /output, and writes /output/dossier.json
+// with the vendored make.fun library, byte for byte the scorer's own copy. Before anything
+// is written the board is checked against the gate's shape; a board the gate would refuse
+// stops the run.
 //
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts --input ../input/snapshot.json
@@ -86,7 +88,8 @@ for (const name of shots) {
 writeFileSync(join(out, 'dossier.json'), buildDossier(out, DOSSIER_CAPS));
 
 process.stdout.write(
-  `launch radar: ${snapshot.protocols.length} protocols scanned, ${radar.pre_token} record no token, ${board.length} ranked ` +
-    `(${snapshot.watchlist.length} watchlist, ${radar.early_size} early), ${radar.comps.peers} live peers anchor the multiples\n` +
+  `launch radar: ${snapshot.protocols.length} protocols scanned, ${radar.meta.no_token} record no token, ${board.length} ranked ` +
+    `(${radar.meta.watchlist_covered}/${snapshot.watchlist.length} watchlist), model "${radar.model.chosen}" on ${radar.model.n} peers, ` +
+    `leave-one-out median error x${radar.model.loo.median_factor.toFixed(2)}\n` +
     `launch radar: wrote board.json, data.js, dashboard/ (${pageFiles.length} files), screenshots/ (${shots.length} images) and dossier.json under ${out}\n`,
 );
